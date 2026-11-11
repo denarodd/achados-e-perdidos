@@ -249,10 +249,16 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(200, f.read(), "text/html; charset=utf-8")
             return self._send(200, {
                 "api": "Achados e Perdidos",
-                "endpoints": ["/api/itens", "/api/devolucoes", "/api/health"],
+                "endpoints": ["/api/itens", "/api/devolucoes", "/api/categorias", "/api/health"],
             })
         if path == "/api/health":
             return self._send(200, {"ok": True})
+        if method == "GET" and path == "/api/categorias":
+            return self._send(200, {
+                "categorias": sorted(CATEGORIAS),
+                "status_item": sorted(STATUS_ITEM),
+                "status_devolucao": sorted(STATUS_SOLIC),
+            })
 
         m = re.fullmatch(r"/api/itens(?:/(\d+))?", path)
         if m:

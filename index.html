@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Achados e Perdidos</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--tx:#1b2130;--mut:#667085;--bd:#e3e6ec;--code:#0f1521;--codetx:#d8e1f5;--pri:#2457d6;
+--get:#157f4b;--post:#b54708;--patch:#6941c6}
+@media(prefers-color-scheme:dark){:root{--bg:#10131a;--card:#1a1e29;--tx:#eef1f6;--mut:#9aa3b5;--bd:#2b3140;--code:#0a0d14;--pri:#7aa0ff;--get:#4ade80;--post:#fbbf24;--patch:#b79cff}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+header{padding:44px 0 26px;border-bottom:1px solid var(--bd);background:var(--card)}
+h1{margin:0 0 6px;font-size:30px}
+header p{margin:0;color:var(--mut);max-width:640px}
+.base{margin-top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.base code{background:var(--code);color:var(--codetx);padding:8px 12px;border-radius:8px;font-size:14px}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 13px;border-radius:8px}
+button.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:3px 11px;color:var(--mut)}
+h2{font-size:20px;margin:34px 0 12px}
+.ep{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.ep summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;flex-wrap:wrap}
+.ep summary::-webkit-details-marker{display:none}
+.m{font-weight:700;font-size:12px;min-width:56px;text-align:center;padding:3px 0;border-radius:6px;color:#fff}
+.m.GET{background:var(--get)}.m.POST{background:var(--post)}.m.PATCH{background:var(--patch)}
+.ep summary code{font-weight:600}.ep summary span.d{color:var(--mut);font-size:14px}
+.body{padding:4px 16px 18px;border-top:1px solid var(--bd)}
+.body h4{margin:16px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px}
+pre{margin:0;background:var(--code);color:var(--codetx);padding:12px 14px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.5;max-height:340px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{padding:3px 11px;font-size:13px}.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.try{display:grid;gap:8px}
+.try label{font-size:13px;color:var(--mut);display:grid;gap:3px}
+input,textarea{font:13px ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);width:100%}
+.st{font-size:13px;margin:4px 0}.ok{color:var(--get)}.er{color:#d92d20}
+footer{padding:30px 0 50px;color:var(--mut);font-size:13px}
+a{color:var(--pri)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+ <h1>🔎 API Achados e Perdidos</h1>
+ <p>API REST aberta e gratuita para cadastrar objetos achados ou perdidos, filtrar por categoria e registrar pedidos de devolução. Use os dados para montar o seu próprio app.</p>
+ <div class="base"><strong>URL base</strong> <code id="base"></code><button onclick="copiar(base.textContent)">Copiar</button></div>
+ <div class="pills"><span class="pill">Formato: JSON</span><span class="pill">Sem autenticação</span><span class="pill">CORS liberado (use direto do navegador)</span></div>
+</div></header>
+
+<main class="wrap">
+ <h2>Início rápido</h2>
+ <div class="ep"><div class="body">
+  <div class="tabs"><button class="on" onclick="qs('js',this)">JavaScript</button><button onclick="qs('py',this)">Python</button><button onclick="qs('curl',this)">curl</button></div>
+  <pre id="quick"></pre>
+ </div></div>
+
+ <h2>Valores aceitos</h2>
+ <div class="ep"><div class="body">
+  <table>
+   <tr><th>Campo</th><th>Valores</th></tr>
+   <tr><td><code>categoria</code></td><td id="vcat">carregando…</td></tr>
+   <tr><td><code>status</code> do objeto</td><td id="vst">carregando…</td></tr>
+   <tr><td><code>status</code> da devolução</td><td id="vsd">carregando…</td></tr>
+   <tr><td><code>data</code></td><td>ISO 8601, ex.: <code>2026-11-09T08:15:00-03:00</code></td></tr>
+  </table>
+ </div></div>
+
+ <h2>Endpoints</h2>
+ <div id="eps"></div>
+
+ <h2>Erros</h2>
+ <div class="ep"><div class="body">
+  <table>
+   <tr><th>Código</th><th>Quando</th></tr>
+   <tr><td>201</td><td>Registro criado</td></tr>
+   <tr><td>404</td><td>Objeto, solicitação ou rota não encontrados</td></tr>
+   <tr><td>409</td><td>Pedido de devolução para objeto que já foi devolvido</td></tr>
+   <tr><td>422</td><td>Campo obrigatório ausente ou valor inválido</td></tr>
+  </table>
+  <h4>Formato do erro</h4><pre>{ "erro": "Campo obrigatório: nome" }</pre>
+ </div></div>
+</main>
+<footer class="wrap">Projeto acadêmico · API em Python + SQLite</footer>
+
+<script>
+const BASE = location.origin + "/api";
+const $ = id => document.getElementById(id);
+$("base").textContent = BASE;
+const copiar = t => navigator.clipboard && navigator.clipboard.writeText(t);
+
+const EX_ITEM = {nome:"Guarda-chuva",descricao:"Preto, dobrável",categoria:"outros",status:"achado",local:"Recepção",data:"2026-11-10T13:25:00-03:00",foto:"",contato:""};
+const EPS = [
+ {m:"GET",p:"/itens",d:"Lista objetos, com filtros opcionais",
+  q:[["categoria","Filtra por categoria"],["status","achado, perdido ou devolvido"],["q","Busca no nome, descrição e local"]],tq:"categoria=eletronicos",
+  r:`[{ "id": 1, "nome": "Fone de ouvido Bluetooth", "descricao": "...", "categoria": "eletronicos",\n  "status": "achado", "local": "Biblioteca...", "data": "2026-11-09T08:15:00-03:00",\n  "foto": "", "contato": "" }]`},
+ {m:"GET",p:"/itens/{id}",d:"Detalha um objeto",id:"1",r:`{ "id": 1, "nome": "Fone de ouvido Bluetooth", ... }`},
+ {m:"POST",p:"/itens",d:"Cadastra um objeto",
+  f:[["nome","texto","sim","Até 80 caracteres"],["categoria","texto","sim","Ver valores aceitos"],["local","texto","sim",""],["data","texto","sim","ISO 8601"],["status","texto","não","achado (padrão) ou perdido"],["descricao","texto","não",""],["foto","texto","não","URL da imagem"],["contato","texto","não","E-mail ou telefone de quem registrou"]],
+  b:EX_ITEM,r:`201 Created → o objeto criado, com "id"`},
+ {m:"PATCH",p:"/itens/{id}",d:"Altera a situação do objeto",id:"1",f:[["status","texto","sim","achado, perdido ou devolvido"]],b:{status:"devolvido"},r:`200 OK → o objeto atualizado`},
+ {m:"GET",p:"/devolucoes",d:"Lista solicitações de devolução",q:[["status","pendente, aprovada ou recusada"],["item_id","Filtra por objeto"]],tq:"status=pendente",
+  r:`[{ "id": 1, "item_id": 1, "solicitante": "Ana", "contato": "ana@email.com",\n  "mensagem": "A case tem um arranhão", "status": "pendente",\n  "data": "2026-11-10T20:16:28+00:00", "item": { "id": 1, "nome": "Fone..." } }]`},
+ {m:"POST",p:"/devolucoes",d:"Registra um pedido de devolução",
+  f:[["item_id","número","sim","ID do objeto"],["solicitante","texto","sim","Nome de quem pede"],["contato","texto","sim","E-mail ou telefone"],["mensagem","texto","sim","Como comprovar que é o dono"]],
+  b:{item_id:1,solicitante:"Ana",contato:"ana@email.com",mensagem:"A case tem um arranhão"},r:`201 Created → a solicitação criada (status "pendente")`},
+ {m:"PATCH",p:"/devolucoes/{id}",d:"Aprova ou recusa uma solicitação",id:"1",f:[["status","texto","sim","pendente, aprovada ou recusada"]],b:{status:"aprovada"},r:`200 OK → a solicitação atualizada`},
+ {m:"GET",p:"/categorias",d:"Lista categorias e status aceitos",r:`{ "categorias": [...], "status_item": [...], "status_devolucao": [...] }`},
+ {m:"GET",p:"/health",d:"Verifica se a API está no ar",r:`{ "ok": true }`}
+];
+
+function eh(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){
+ $("eps").innerHTML = EPS.map((e,i)=>`
+ <details class="ep" ${i===0?"open":""}><summary><span class="m ${e.m}">${e.m}</span><code>${eh(e.p)}</code><span class="d">${eh(e.d)}</span></summary>
+ <div class="body">
+  ${e.q?`<h4>Parâmetros de busca (opcionais)</h4><table>${e.q.map(x=>`<tr><td><code>${x[0]}</code></td><td>${x[1]}</td></tr>`).join("")}</table>`:""}
+  ${e.f?`<h4>Corpo (JSON)</h4><table><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr>${e.f.map(x=>`<tr><td><code>${x[0]}</code></td><td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td></tr>`).join("")}</table>`:""}
+  <h4>Resposta</h4><pre>${eh(e.r)}</pre>
+  <h4>Testar agora</h4>
+  <div class="try">
+   ${e.id?`<label>id<input id="id${i}" value="${e.id}"></label>`:""}
+   ${e.q?`<label>Parâmetros de busca<input id="q${i}" value="${e.tq||""}" placeholder="ex.: categoria=chaves&status=achado"></label>`:""}
+   ${e.b?`<label>Corpo (JSON)<textarea id="b${i}" rows="${Object.keys(e.b).length+2}">${eh(JSON.stringify(e.b,null,2))}</textarea></label>`:""}
+   <div><button class="pri" onclick="enviar(${i})">Enviar requisição</button></div>
+   <div class="st" id="s${i}"></div><pre id="o${i}" style="display:none"></pre>
+  </div>
+ </div></details>`).join("");
+}
+async function enviar(i){
+ const e=EPS[i];
+ let path=e.p; if(e.id) path=path.replace("{id}",encodeURIComponent($("id"+i).value));
+ const q=e.q?$("q"+i).value.trim():""; if(q) path+="?"+q;
+ const opt={method:e.m};
+ if(e.b){opt.headers={"Content-Type":"application/json"};opt.body=$("b"+i).value;}
+ const st=$("s"+i),out=$("o"+i); st.textContent="Enviando…";st.className="st";
+ try{
+  const t0=performance.now(),r=await fetch(BASE+path,opt),txt=await r.text();
+  let shown=txt;try{shown=JSON.stringify(JSON.parse(txt),null,2)}catch(_){}
+  st.innerHTML=`<span class="${r.ok?"ok":"er"}">${r.status} ${r.statusText}</span> · ${Math.round(performance.now()-t0)} ms · ${e.m} ${eh(BASE+path)}`;
+  out.textContent=shown;out.style.display="block";
+ }catch(err){st.innerHTML=`<span class="er">Não foi possível conectar à API.</span>`;out.style.display="none"}
+}
+const QS={
+ js:`// Funciona direto no navegador ou no Node 18+\nconst r = await fetch("${BASE}/itens?categoria=eletronicos");\nconst itens = await r.json();\nconsole.log(itens);`,
+ py:`import requests\n\nr = requests.get("${BASE}/itens", params={"categoria": "eletronicos"})\nprint(r.json())`,
+ curl:`curl "${BASE}/itens?categoria=eletronicos"`
+};
+function qs(k,b){$("quick").textContent=QS[k];document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b))}
+qs("js",document.querySelector(".tabs button"));
+render();
+fetch(BASE+"/categorias").then(r=>r.json()).then(d=>{
+ const c=a=>a.map(x=>`<code>${x}</code>`).join(" ");
+ $("vcat").innerHTML=c(d.categorias);$("vst").innerHTML=c(d.status_item);$("vsd").innerHTML=c(d.status_devolucao);
+}).catch(()=>{$("vcat").textContent=$("vst").textContent=$("vsd").textContent="API fora do ar"});
+</script>
+</body>
+</html>
