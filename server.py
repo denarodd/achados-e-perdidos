@@ -243,8 +243,14 @@ class Handler(BaseHTTPRequestHandler):
         qs = {k: v[0] for k, v in parse_qs(url.query).items()}
 
         if method == "GET" and path in ("/", "/index.html"):
-            with open(os.path.join(BASE, "index.html"), "rb") as f:
-                return self._send(200, f.read(), "text/html; charset=utf-8")
+            index = os.path.join(BASE, "index.html")
+            if os.path.exists(index):  # frontend opcional
+                with open(index, "rb") as f:
+                    return self._send(200, f.read(), "text/html; charset=utf-8")
+            return self._send(200, {
+                "api": "Achados e Perdidos",
+                "endpoints": ["/api/itens", "/api/devolucoes", "/api/health"],
+            })
         if path == "/api/health":
             return self._send(200, {"ok": True})
 
